@@ -69,89 +69,124 @@ textBox.PlaceholderText = "Enter key..."
 textBox.Font = Enum.Font.Gotham
 textBox.TextScaled = true
 textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
---[[
-     PRESS F TO START THE SCRIPT
-]]
+textBox.TextColor3 = Color3.new(1, 1, 1)
 
-local Keybind = "F"
+local submitButton = Instance.new("TextButton", keyFrame)
+submitButton.Size = UDim2.new(0.9, 0, 0.25, 0)
+submitButton.Position = UDim2.new(0.05, 0, 0.65, 0)
+submitButton.Text = "Submit"
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextScaled = true
+submitButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+submitButton.TextColor3 = Color3.new(1, 1, 1)
 
-local SessionID = string.gsub(tostring(math.random()):sub(3), "%d", function(c)
-    return string.char(96 + math.random(1, 26))
+local resultLabel = Instance.new("TextLabel", keyFrame)
+resultLabel.Size = UDim2.new(1, 0, 0.2, 0)
+resultLabel.Position = UDim2.new(0, 0, 1, 0)
+resultLabel.BackgroundTransparency = 1
+resultLabel.Text = ""
+resultLabel.Font = Enum.Font.Gotham
+resultLabel.TextScaled = true
+resultLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+
+-- Kill the script when Close is clicked
+closeButton.MouseButton1Click:Connect(function()
+    introGui:Destroy()
+    keyGui:Destroy()
+    print("❌ Script closed by user.")
+    script:Destroy()
 end)
-print(' | Running BigPaintball2.lua made by Astro with keybind ' .. Keybind .. '! [SessionID ' .. SessionID .. ']')
 
-local Enabled = false
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
+-- After a few seconds, show the key GUI
+task.delay(2, function()
+    introGui:Destroy()
+    keyGui.Enabled = true
+end)
 
--- Fehlerprotokollierung und Schutz
-local function safeExecute(func)
-    local success, errorMessage = pcall(func)
-    if not success then
-        warn(' | Error occurred: ' .. errorMessage .. ' [SessionID ' .. SessionID .. ']')
-    end
-end
+-- Submit key
+submitButton.MouseButton1Click:Connect(function()
+    if textBox.Text == correctKey then
+        keyGui:Destroy()
+        print("✔ Access granted. Welcome, cloudy!")
+        -- Continue your script here
 
--- Gegner und Spieler an festen Positionen teleportieren
-local function teleportEntities(cframe, team)
-    local spawnPosition = cframe * CFrame.new(0, 0, -15) -- Feste Position vor dem Spieler
+        local Keybind = "F"
 
-    -- Verarbeiten von EntitÃ¤ten
-    for _, entity in ipairs(Workspace.__THINGS.__ENTITIES:GetChildren()) do
-        if entity:FindFirstChild("HumanoidRootPart") then
-            local humanoidRootPart = entity.HumanoidRootPart
-            humanoidRootPart.CanCollide = false
-            humanoidRootPart.Anchored = true
-            humanoidRootPart.CFrame = spawnPosition
-        elseif entity:FindFirstChild("Hitbox") then
-            local directory = entity:GetAttribute("Directory")
-            if not (directory == "White" and entity:GetAttribute("OwnerUID") == LocalPlayer.UserId) and
-               (not team or directory ~= team.Name) then
-                entity.Hitbox.CanCollide = false
-                entity.Hitbox.Anchored = true
-                entity.Hitbox.CFrame = spawnPosition * CFrame.new(math.random(-5, 5), 0, math.random(-5, 5))
+        local SessionID = string.gsub(tostring(math.random()):sub(3), "%d", function(c)
+            return string.char(96 + math.random(1, 26))
+        end)
+        print(' | Running BigPaintball2.lua made by Astro with keybind ' .. Keybind .. '! [SessionID ' .. SessionID .. ']')
+
+        local Enabled = false
+        local UserInputService = game:GetService("UserInputService")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local Workspace = game:GetService("Workspace")
+
+        local function safeExecute(func)
+            local success, errorMessage = pcall(func)
+            if not success then
+                warn(' | Error occurred: ' .. errorMessage .. ' [SessionID ' .. SessionID .. ']')
             end
         end
-    end
 
-    -- Verarbeiten von Spielern
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            if not team or team.Name ~= player.Team.Name then
-                if not player.Character:FindFirstChild("ForceField") then
-                    local humanoidRootPart = player.Character.HumanoidRootPart
+        local function teleportEntities(cframe, team)
+            local spawnPosition = cframe * CFrame.new(0, 0, -15)
+
+            for _, entity in ipairs(Workspace.__THINGS.__ENTITIES:GetChildren()) do
+                if entity:FindFirstChild("HumanoidRootPart") then
+                    local humanoidRootPart = entity.HumanoidRootPart
                     humanoidRootPart.CanCollide = false
                     humanoidRootPart.Anchored = true
-                    humanoidRootPart.CFrame = spawnPosition * CFrame.new(math.random(-5, 5), 0, math.random(-5, 5))
+                    humanoidRootPart.CFrame = spawnPosition
+                elseif entity:FindFirstChild("Hitbox") then
+                    local directory = entity:GetAttribute("Directory")
+                    if not (directory == "White" and entity:GetAttribute("OwnerUID") == LocalPlayer.UserId) and
+                       (not team or directory ~= team.Name) then
+                        entity.Hitbox.CanCollide = false
+                        entity.Hitbox.Anchored = true
+                        entity.Hitbox.CFrame = spawnPosition * CFrame.new(math.random(-5, 5), 0, math.random(-5, 5))
+                    end
+                end
+            end
+
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    if not team or team.Name ~= player.Team.Name then
+                        if not player.Character:FindFirstChild("ForceField") then
+                            local humanoidRootPart = player.Character.HumanoidRootPart
+                            humanoidRootPart.CanCollide = false
+                            humanoidRootPart.Anchored = true
+                            humanoidRootPart.CFrame = spawnPosition * CFrame.new(math.random(-5, 5), 0, math.random(-5, 5))
+                        end
+                    end
                 end
             end
         end
-    end
-end
 
--- Eingabeerkennung fÃ¼r das Umschalten
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode[Keybind] and not gameProcessedEvent then
-        Enabled = not Enabled
-        if Enabled then
-            print(' | Enabled BigPaintball2.lua [SessionID ' .. SessionID .. ']')
-        else
-            print(' | Disabled BigPaintball2.lua [SessionID ' .. SessionID .. ']')
+        UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+            if input.KeyCode == Enum.KeyCode[Keybind] and not gameProcessedEvent then
+                Enabled = not Enabled
+                if Enabled then
+                    print(' | Enabled BigPaintball2.lua [SessionID ' .. SessionID .. ']')
+                else
+                    print(' | Disabled BigPaintball2.lua [SessionID ' .. SessionID .. ']')
+                end
+            end
+        end)
+
+        while wait(0.1) do
+            safeExecute(function()
+                if not Enabled or not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    return
+                end
+
+                local cframe = LocalPlayer.Character.HumanoidRootPart.CFrame
+                local team = LocalPlayer.Team
+                teleportEntities(cframe, team)
+            end)
         end
+    else
+        resultLabel.Text = "❌ Wrong key. Try again!"
     end
 end)
-
--- Hauptschleife
-while wait(0.1) do -- Optimierte Aktualisierungsrate
-    safeExecute(function()
-        if not Enabled or not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            return
-        end
-
-        local cframe = LocalPlayer.Character.HumanoidRootPart.CFrame -- Spielerposition
-        local team = LocalPlayer.Team -- Spielerteam
-        teleportEntities(cframe, team)
-    end)
-end
